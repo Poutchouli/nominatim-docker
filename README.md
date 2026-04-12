@@ -66,6 +66,19 @@ curl "http://localhost:8080/search?q=Monaco&format=jsonv2"
 
 > **✅ Si vous obtenez une réponse JSON avec des résultats, c'est fonctionnel !**
 
+### Reprendre une base déjà importée
+
+Si la base PostgreSQL existe déjà, le wizard peut redémarrer l'instance sans supprimer le volume :
+
+```bash
+./start.sh --reuse-existing
+./start.sh --reuse-existing --compose-file contrib/docker-compose-normandie-region.yml --env-file contrib/.env
+```
+
+Ce mode exécute uniquement `docker compose up -d` et ne fait jamais de `down -v`.
+Il faut réutiliser le même fichier Compose et, si nécessaire, le même fichier d'environnement qu'au moment de l'import initial.
+Sans option, le wizard interactif propose aussi automatiquement `Reprendre une base existante` lorsqu'un compose déjà utilisé est détecté.
+
 Exemples de requêtes :
 
 ```bash
@@ -224,7 +237,8 @@ Le pipeline CI (`.github/workflows/ci.yml`) exécute 15 scénarios de test avec 
 ```
 nominatim-docker/
 ├── Dockerfile                  # Image Docker multi-stage (Ubuntu 24.04 + Nominatim 5.3)
-├── start.sh                    # Point d'entrée du conteneur
+├── entrypoint.sh               # Point d'entrée du conteneur
+├── start.sh                    # Wizard interactif de déploiement (usage hôte)
 ├── init.sh                     # Import initial (premier démarrage)
 ├── config.sh                   # Validation et application de la configuration
 ├── conf.d/
@@ -240,6 +254,13 @@ nominatim-docker/
 │   ├── prepare-normandie.sh / .ps1             # Préparation données Normandie
 │   ├── prepare-normandie-region.sh / .ps1      # Préparation région étendue
 │   └── export-normandie.sh / .ps1              # Export archive transportable
+├── lib/                        # Bibliothèques du wizard
+│   ├── regions.sh              # Catalogue régions/départements Geofabrik France
+│   ├── detect.sh               # Détection réseau, ressources, prérequis
+│   └── progress.sh             # Barres de progression, estimation du temps
+├── templates/                  # Templates pour le wizard
+│   ├── docker-compose.tpl.yml  # Template docker-compose avec placeholders
+│   └── API-GUIDE.tpl.md        # Template guide API avec placeholders
 ├── data/                       # Données OSM téléchargées (gitignored)
 ├── howto.md                    # Guide de configuration détaillé
 ├── Normandie-SETUP.md          # Guide avancé Normandie (troubleshooting, export USB)

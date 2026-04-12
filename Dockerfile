@@ -81,7 +81,7 @@ COPY conf.d/postgres-tuning.conf /etc/postgresql/16/main/conf.d/
 
 COPY config.sh /app/config.sh
 COPY init.sh /app/init.sh
-COPY start.sh /app/start.sh
+COPY entrypoint.sh /app/entrypoint.sh
 
 # Collapse image to single layer.
 FROM scratch
@@ -104,4 +104,4 @@ EXPOSE 8080
 
 COPY conf.d/env $PROJECT_DIR/.env
 
-CMD ["/app/start.sh"]
+CMD ["/app/entrypoint.sh"]

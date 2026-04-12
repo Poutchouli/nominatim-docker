@@ -1,0 +1,22 @@
+services:
+  nominatim:
+    container_name: __CONTAINER_NAME__
+    image: mediagis/nominatim:5.3
+    ports:
+      - "__BIND_IP__:__PORT__:8080"
+    environment:
+      PBF_PATH: /nominatim/data/__PBF_NAME__
+      REPLICATION_URL: https://download.geofabrik.de/europe/france-updates/
+      UPDATE_MODE: continuous
+      NOMINATIM_PASSWORD: __PASSWORD__
+      IMPORT_STYLE: full
+      THREADS: __THREADS__
+    volumes:
+      - type: bind
+        source: ./data
+        target: /nominatim/data
+      - nominatim-data-db:/var/lib/postgresql/16/main
+    shm_size: 1gb
+
+volumes:
+  nominatim-data-db:
