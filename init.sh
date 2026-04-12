@@ -4,7 +4,11 @@ OSMFILE=${PROJECT_DIR}/data.osm.pbf
 
 CURL=("curl" "-L" "-A" "${USER_AGENT}" "--fail-with-body")
 
-SCP='sshpass -p DMg5bmLPY7npHL2Q scp -o StrictHostKeyChecking=no u355874-sub1@u355874-sub1.your-storagebox.de'
+if [ -z "$SCP_PASSWORD" ]; then
+  echo "WARNING: SCP_PASSWORD environment variable is not set. Optional data downloads from the storage box will fail."
+  echo "Set SCP_PASSWORD if you need Wikipedia importance, postcodes or TIGER address data."
+fi
+SCP="sshpass -p ${SCP_PASSWORD} scp -o StrictHostKeyChecking=no u355874-sub1@u355874-sub1.your-storagebox.de"
 
 # Check if THREADS is not set or is empty
 if [ -z "$THREADS" ]; then

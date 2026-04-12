@@ -1,5 +1,3 @@
-version: "3"
-
 # Instance Nominatim pour la Normandie (région actuelle) en fusionnant les anciens extraits
 # haute-normandie + basse-normandie (Geofabrik ne fournit pas un fichier 'normandie-latest').
 # Préparation (PowerShell) AVANT de lancer ce docker-compose :
@@ -14,7 +12,7 @@ version: "3"
 services:
   nominatim:
     container_name: nominatim-normandie
-    image: mediagis/nominatim:5.1
+    image: mediagis/nominatim:5.3
     ports:
       - "8080:8080"   # API http://localhost:8080
     environment:
