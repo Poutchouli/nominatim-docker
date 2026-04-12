@@ -59,6 +59,7 @@ def parse_region_order(lines: list[str]) -> list[str]:
 def parse_departments(lines: list[str]) -> tuple[list[dict], dict[str, list[dict]]]:
     departments: list[dict] = []
     by_region: dict[str, list[dict]] = defaultdict(list)
+    seen_keys: set[tuple[str, str, str]] = set()
 
     for raw_line in lines:
         matches = DEPARTMENT_PATTERN.findall(raw_line)
@@ -89,6 +90,14 @@ def parse_departments(lines: list[str]) -> tuple[list[dict], dict[str, list[dict
                 "normalized_name": normalized_name,
                 "region_id": region_id,
             }
+            dedupe_key = (
+                region_id,
+                (code or "").upper(),
+                "" if code else (normalized_name or ""),
+            )
+            if dedupe_key in seen_keys:
+                continue
+            seen_keys.add(dedupe_key)
             departments.append(department)
             by_region[region_id].append(department)
 
