@@ -14,13 +14,13 @@ services:
     container_name: nominatim-normandie
     image: mediagis/nominatim:5.3
     ports:
-      - "8080:8080"   # API http://localhost:8080
+      - "${NOMINATIM_BIND_IP}:8080:8080"   # API sur l'IP LAN choisie
     environment:
       PBF_PATH: /nominatim/data/normandie.osm.pbf
       # Pas de flux updates unifié; on peut utiliser france-updates pour couvrir tout et ignorer le reste.
       REPLICATION_URL: https://download.geofabrik.de/europe/france-updates/
       UPDATE_MODE: continuous
-      NOMINATIM_PASSWORD: change_me_normandie
+      NOMINATIM_PASSWORD: ${NOMINATIM_PASSWORD}
       IMPORT_STYLE: full        # ou address pour accélérer l'import
       # THREADS: 4              # décommentez pour fixer le nombre de threads
     volumes:

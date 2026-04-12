@@ -20,6 +20,8 @@ done
 
 DATA_DIR="$(cd "$(dirname "$0")/.." && pwd)/data"
 mkdir -p "$DATA_DIR"
+HOST_UID="$(id -u)"
+HOST_GID="$(id -g)"
 
 log(){ printf "\033[36m[INFO]\033[0m %s\n" "$*"; }
 warn(){ printf "\033[33m[WARN]\033[0m %s\n" "$*"; }
@@ -68,9 +70,10 @@ OSMIUM_BIN="osmium"
 if ! command -v osmium >/dev/null 2>&1; then
   if command -v docker >/dev/null 2>&1; then
     log "osmium non trouvé localement: fallback Docker (ubuntu + osmium-tool)"
-    docker run --rm -v "$DATA_DIR:/data" ubuntu:24.04 bash -lc "set -e; apt-get update -qq && apt-get install -yqq osmium-tool >/dev/null && \
+    docker run --rm -e HOST_UID="$HOST_UID" -e HOST_GID="$HOST_GID" -v "$DATA_DIR:/data" ubuntu:24.04 bash -lc "set -e; apt-get update -qq && apt-get install -yqq osmium-tool >/dev/null && \
       osmium merge /data/haute-normandie-$DATE.osm.pbf /data/basse-normandie-$DATE.osm.pbf -o /data/_tmp-normandie.osm.pbf --overwrite && \
       osmium sort /data/_tmp-normandie.osm.pbf -o /data/normandie.osm.pbf --overwrite && rm /data/_tmp-normandie.osm.pbf && \
+      chown \"$HOST_UID:$HOST_GID\" /data/normandie.osm.pbf && \
       osmium fileinfo -e /data/normandie.osm.pbf | head -n 12" || { err "Fusion via docker échouée"; exit 1; }
     log "Fichier final: $DATA_DIR/normandie.osm.pbf"
     exit 0

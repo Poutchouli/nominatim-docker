@@ -20,6 +20,8 @@ done
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DATA_DIR="$ROOT_DIR/data"
 mkdir -p "$DATA_DIR"
+HOST_UID="$(id -u)"
+HOST_GID="$(id -g)"
 
 log(){ printf "\033[36m[INFO]\033[0m %s\n" "$*"; }
 err(){ printf "\033[31m[ERR ]\033[0m %s\n" "$*"; }
@@ -66,9 +68,10 @@ OSMIUM_BIN="osmium"
 if ! command -v osmium >/dev/null 2>&1; then
   if command -v docker >/dev/null 2>&1; then
     log "osmium absent: fallback docker"
-    docker run --rm -v "$DATA_DIR:/data" ubuntu:24.04 bash -lc "set -e; apt-get update -qq && apt-get install -yqq osmium-tool >/dev/null && \
+    docker run --rm -e HOST_UID="$HOST_UID" -e HOST_GID="$HOST_GID" -v "$DATA_DIR:/data" ubuntu:24.04 bash -lc "set -e; apt-get update -qq && apt-get install -yqq osmium-tool >/dev/null && \
       osmium merge /data/normandie.osm.pbf /data/bretagne-$DATE.osm.pbf /data/pays-de-la-loire-$DATE.osm.pbf /data/ile-de-france-$DATE.osm.pbf -o /data/_tmp-region.osm.pbf --overwrite && \
       osmium sort /data/_tmp-region.osm.pbf -o /data/normandie-region.osm.pbf --overwrite && rm /data/_tmp-region.osm.pbf && \
+      chown \"$HOST_UID:$HOST_GID\" /data/normandie-region.osm.pbf && \
       osmium fileinfo -e /data/normandie-region.osm.pbf | head -n 10" || { err "Fusion via docker échouée"; exit 1; }
     log "Terminé: $DATA_DIR/normandie-region.osm.pbf"; exit 0
   else
